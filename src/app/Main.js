@@ -135,10 +135,26 @@ const CubeButton = styled.div`
   }
 `;
 
+const ProjectDetail = styled.div`
+  position: absolute;
+  width: 100vw;
+  height: 100vh;
+  top: 0;
+  z-index: 1;
+  transition: transform 0.5s ease-in-out;
+  transform: ${(props) =>
+    props.$isActive ? "translateX(0)" : "translateX(100vw)"};
+`;
+
 const ProjectIcon = styled.div`
   position: fixed;
-  top: ${props => props.$top === 0 ? 1500 : props.$top}px;
-  left: 80px;
+  top: 50%;
+  left: 0;
+  translate: 0 -50%;
+  transition: transform 0.3s ease-in-out;
+  transform: ${(props) =>
+    props.$isActive ? "translateX(80px)" : "translateX(-100vw)"};
+  visibility: ${(props) => props.$isSelected ? "visible" : "hidden"};
 `;
 
 const pages = [
@@ -278,7 +294,7 @@ const Main = () => {
     }
 
     // 삭제가 완료되었을 때
-    if (isDeleting && text === "") {
+    if (isDeleting && text === "De") {
       setIsDeleting(false);
       setWordIndex((prev) => (prev + 1) % WORDS.length);
       return;
@@ -405,11 +421,10 @@ const Main = () => {
             </CubeButton>
           </div>
           {/* 1 */}
-          <div
-            className={`absolute top-0 transition-transform duration-500 ${selectedProjectId === 1 ? (currentPage === 2 ? "" : "translate-x-[100vw]") : "translate-x-[100vw]"} z-1`}
-          >
+          <ProjectDetail $isActive={selectedProjectId === 1 && currentPage === 2}>
             <div className="relative h-screen w-screen">
-              <ProjectIcon $top={Math.round((containerHeight / 3) * 1.1)}>
+              {/* $top={Math.round((containerHeight / 3) * 1.1)} */}
+              <ProjectIcon $isActive={selectedProjectId === 1 && currentPage === 2} $top={Math.round((containerHeight / 3) * 1.1)} $isSelected={selectedProjectId === 1}>
                 <img
                   src="/images/logo_ub.png"
                   alt="logo_ub"
@@ -423,13 +438,11 @@ const Main = () => {
                 hello
               </div>
             </div>
-          </div>
+          </ProjectDetail>
           {/* 2 */}
-          <div
-            className={`absolute h-screen w-screen top-0 transition-transform duration-500 ${selectedProjectId === 2 ? (currentPage === 2 ? "" : "translate-x-[100vw]") : "translate-x-[100vw]"} z-1`}
-          >
+          <ProjectDetail $isActive={selectedProjectId === 2 && currentPage === 2}>
             <div className="relative h-screen w-screen">
-              <ProjectIcon $top={Math.round((containerHeight / 3) * 1.1)}>
+              <ProjectIcon $isActive={selectedProjectId === 2 && currentPage === 2} $top={Math.round((containerHeight / 3) * 1.1)} $isSelected={selectedProjectId === 2}>
                 <img
                   src="/images/logo_ls.png"
                   alt="logo_ls"
@@ -443,13 +456,11 @@ const Main = () => {
                 hello
               </div>
             </div>
-          </div>
+            </ProjectDetail>
           {/* 3 */}
-          <div
-            className={`absolute h-screen w-screen top-0 transition-transform duration-500 ${selectedProjectId === 3 ? (currentPage === 2 ? "" : "translate-x-[100vw]") : "translate-x-[100vw]"} z-1`}
-          >
+          <ProjectDetail $isActive={selectedProjectId === 3 && currentPage === 2}>
             <div className="relative h-screen w-screen">
-              <ProjectIcon $top={Math.round((containerHeight / 3) * 1.1)}>
+              <ProjectIcon $isActive={selectedProjectId === 3 && currentPage === 2} $top={Math.round((containerHeight / 3) * 1.1)} $isSelected={selectedProjectId === 3}>
                 <img
                     src="/images/logo_rm.png"
                     alt="logo_rm"
@@ -463,7 +474,7 @@ const Main = () => {
                 hello
               </div>
             </div>
-          </div>
+          </ProjectDetail>
         </div>
         <div
           className={`h-screen flex justify-center items-center text-white text-4xl font-bold`}
