@@ -3,7 +3,9 @@
 import "./main.css";
 import { useState, useEffect, useCallback, useRef } from "react";
 import styled, { css } from "styled-components";
-import ProjectNavigation from "./components/projectNavigation";
+import ProjectNavigation from "./components/project/Navigation";
+import ProjectTab from "./components/project/Tab";
+import ProjectToggleButton from "./components/project/ToggleButton";
 const NoiseCanvas = styled.canvas`
   position: absolute;
   top: 0;
@@ -135,7 +137,7 @@ const CubeButton = styled.div`
   }
 `;
 
-const ProjectDetail = styled.div`
+const ProjectSection = styled.div`
   position: absolute;
   width: 100vw;
   height: 100vh;
@@ -154,7 +156,42 @@ const ProjectIcon = styled.div`
   transition: transform 0.3s ease-in-out;
   transform: ${(props) =>
     props.$isActive ? "translateX(80px)" : "translateX(-100vw)"};
-  visibility: ${(props) => props.$isSelected ? "visible" : "hidden"};
+  visibility: ${(props) => (props.$isSelected ? "visible" : "hidden")};
+`;
+
+const ProjectContent = styled.div`
+  position: absolute;
+  height: 100vh;
+  width: calc(100vw - 250px);
+  top: 0;
+  right: 0;
+  background: rgba(255, 255, 255, 0.95);
+  z-index: 2;
+  overflow: hidden;
+`;
+
+const ContentWrapper = styled.div`
+  position: relative;
+  width: 100%;
+  height: calc(100% - 40px);
+  display: flex;
+  transition: transform 0.3s ease-in-out;
+  transform: ${(props) =>
+    props.$activePage === "Result" || props.$activePage === "B2B"
+      ? "translateX(0)"
+      : "translateX(-100%)"};
+  z-index: 2;
+`;
+
+const Content = styled.div`
+  flex: 0 0 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  color: #000000;
+  overflow-y: auto;
 `;
 
 const pages = [
@@ -172,6 +209,17 @@ const pages = [
     id: 3,
     title: "Third Page",
     component: <div>Third Page</div>,
+  },
+];
+
+const data = [
+  {
+    id: "Result",
+    name: "Result",
+  },
+  {
+    id: "Review",
+    name: "Review",
   },
 ];
 
@@ -243,7 +291,7 @@ const NoiseEffect = () => {
           resizeThrottle = window.setTimeout(() => {
             window.clearTimeout(loopTimeout);
             setup();
-          }, 200);
+          }, 100);
         },
         false,
       );
@@ -262,7 +310,6 @@ const NoiseEffect = () => {
 
 const Main = () => {
   const containerRef = useRef(null);
-  const [containerHeight, setContainerHeight] = useState(0);
 
   const [text, setText] = useState("Develop");
   const [isDeleting, setIsDeleting] = useState(false);
@@ -279,6 +326,8 @@ const Main = () => {
   //   { id: 3, isSelected: false },
   //   { id: 4, isSelected: false },
   // ]);
+  const [activeTab, setActiveTab] = useState("Result");
+  const [activeButton, setActiveButton] = useState("B2B");
 
   const typeText = useCallback(() => {
     const currentWord = WORDS[wordIndex];
@@ -308,6 +357,11 @@ const Main = () => {
       setText(nextText);
     }
   }, [text, isDeleting, wordIndex, isPaused]);
+
+  const onClickProjectCubeButton = (id) => {
+    setSelectedProjectId(id);
+    setActiveTab("Result");
+  };
 
   useEffect(() => {
     // 초기 애니메이션이 끝난 후 커서와 타이핑 효과 시작
@@ -346,14 +400,11 @@ const Main = () => {
     return () => window.removeEventListener("wheel", handleWheel);
   }, [currentPage, isScrolling]);
 
-  useEffect(() => {
-    if (containerRef.current) {
-      setContainerHeight(containerRef.current.scrollHeight);
-    }
-  }, [containerRef]);
-
   return (
-    <div className="h-screen w-screen overflow-hidden relative" ref={containerRef}>
+    <div
+      className="h-screen w-screen overflow-hidden relative"
+      ref={containerRef}
+    >
       <div
         className="absolute inset-0 w-full h-full transition-transform duration-700 z-1"
         style={{ transform: `translateY(-${(currentPage - 1) * 100}vh)` }}
@@ -379,7 +430,7 @@ const Main = () => {
           <div className="absolute flex items-start gap-20">
             <CubeButton
               $selectedProjectId={selectedProjectId}
-              onClick={() => setSelectedProjectId(1)}
+              onClick={() => onClickProjectCubeButton(1)}
             >
               <span>Urbanbase</span>
               <span className={selectedProjectId === 1 ? "project" : ""}>
@@ -393,7 +444,7 @@ const Main = () => {
             </CubeButton>
             <CubeButton
               $selectedProjectId={selectedProjectId}
-              onClick={() => setSelectedProjectId(2)}
+              onClick={() => onClickProjectCubeButton(2)}
             >
               <span>Life Secretary</span>
               <span className={selectedProjectId === 2 ? "project" : ""}>
@@ -407,7 +458,7 @@ const Main = () => {
             </CubeButton>
             <CubeButton
               $selectedProjectId={selectedProjectId}
-              onClick={() => setSelectedProjectId(3)}
+              onClick={() => onClickProjectCubeButton(3)}
             >
               <span>Ref Mate</span>
               <span className={selectedProjectId === 3 ? "project" : ""}>
@@ -421,10 +472,14 @@ const Main = () => {
             </CubeButton>
           </div>
           {/* 1 */}
-          <ProjectDetail $isActive={selectedProjectId === 1 && currentPage === 2}>
-            <div className="relative h-screen w-screen">
-              {/* $top={Math.round((containerHeight / 3) * 1.1)} */}
-              <ProjectIcon $isActive={selectedProjectId === 1 && currentPage === 2} $top={Math.round((containerHeight / 3) * 1.1)} $isSelected={selectedProjectId === 1}>
+          <ProjectSection
+            $isActive={selectedProjectId === 1 && currentPage === 2}
+          >
+            <div className="relative">
+              <ProjectIcon
+                $isActive={selectedProjectId === 1 && currentPage === 2}
+                $isSelected={selectedProjectId === 1}
+              >
                 <img
                   src="/images/logo_ub.png"
                   alt="logo_ub"
@@ -432,17 +487,65 @@ const Main = () => {
                   height={100}
                 />
               </ProjectIcon>
-              <div
-                className={`absolute h-screen w-[calc(100vw-250px)] top-0 right-0 border border-l-white/70 bg-white/95 z-2`}
-              >
-                hello
-              </div>
+              <ProjectContent>
+                <ProjectTab
+                  data={data}
+                  activeTab={activeTab}
+                  setActiveTab={setActiveTab}
+                />
+                <ProjectToggleButton
+                  activeButton={activeButton}
+                  setActiveButton={setActiveButton}
+                />
+                <ContentWrapper $activePage={activeTab}>
+                  <Content>
+                    <ContentWrapper $activePage={activeButton}>
+                      <Content>
+                        <img
+                          src="/images/ub_b2b_login.png"
+                          alt="ub_b2b_login"
+                        />
+                        <img
+                          src="/images/ub_b2b_asset_list.png"
+                          alt="ub_b2b_asset_list"
+                        />
+                        <img
+                          src="/images/ub_b2b_asset_detail.png"
+                          alt="ub_b2b_asset_detail"
+                        />
+                        <img
+                          src="/images/ub_b2b_category_detail.png"
+                          alt="ub_b2b_category_detail"
+                        />
+                      </Content>
+                      <Content>
+                        <img src="/images/ub_b2c_main.png" alt="ub_b2c_main" />
+                      </Content>
+                    </ContentWrapper>
+                  </Content>
+                  <Content>
+                    <ContentWrapper $activePage={activeButton}>
+                      <Content>
+                        UB B2B 서비스 회고 페이지를 준비중입니다.
+                      </Content>
+                      <Content>
+                        UB B2C 서비스 회고 페이지를 준비중입니다.
+                      </Content>
+                    </ContentWrapper>
+                  </Content>
+                </ContentWrapper>
+              </ProjectContent>
             </div>
-          </ProjectDetail>
+          </ProjectSection>
           {/* 2 */}
-          <ProjectDetail $isActive={selectedProjectId === 2 && currentPage === 2}>
-            <div className="relative h-screen w-screen">
-              <ProjectIcon $isActive={selectedProjectId === 2 && currentPage === 2} $top={Math.round((containerHeight / 3) * 1.1)} $isSelected={selectedProjectId === 2}>
+          <ProjectSection
+            $isActive={selectedProjectId === 2 && currentPage === 2}
+          >
+            <div className="relative">
+              <ProjectIcon
+                $isActive={selectedProjectId === 2 && currentPage === 2}
+                $isSelected={selectedProjectId === 2}
+              >
                 <img
                   src="/images/logo_ls.png"
                   alt="logo_ls"
@@ -450,31 +553,48 @@ const Main = () => {
                   height={90}
                 />
               </ProjectIcon>
-              <div
-                className={`absolute h-screen w-[calc(100vw-250px)] top-0 right-0 border border-l-white/70 bg-white/95 z-2`}
-              >
-                hello
-              </div>
+              <ProjectContent>
+                <ProjectTab
+                  data={data}
+                  activeTab={activeTab}
+                  setActiveTab={setActiveTab}
+                />
+                <ContentWrapper $activePage={activeTab}>
+                  <Content>📊 Result Content</Content>
+                  <Content>📝 Review Content</Content>
+                </ContentWrapper>
+              </ProjectContent>
             </div>
-            </ProjectDetail>
+          </ProjectSection>
           {/* 3 */}
-          <ProjectDetail $isActive={selectedProjectId === 3 && currentPage === 2}>
-            <div className="relative h-screen w-screen">
-              <ProjectIcon $isActive={selectedProjectId === 3 && currentPage === 2} $top={Math.round((containerHeight / 3) * 1.1)} $isSelected={selectedProjectId === 3}>
-                <img
-                    src="/images/logo_rm.png"
-                    alt="logo_rm"
-                    width={80}
-                    height={80}
-                  />
-              </ProjectIcon>
-              <div
-                className={`absolute h-screen w-[calc(100vw-250px)] top-0 right-0 border-2 border border-l-white/70 bg-white/95 z-2`}
+          <ProjectSection
+            $isActive={selectedProjectId === 3 && currentPage === 2}
+          >
+            <div className="relative">
+              <ProjectIcon
+                $isActive={selectedProjectId === 3 && currentPage === 2}
+                $isSelected={selectedProjectId === 3}
               >
-                hello
-              </div>
+                <img
+                  src="/images/logo_rm.png"
+                  alt="logo_rm"
+                  width={80}
+                  height={80}
+                />
+              </ProjectIcon>
+              <ProjectContent>
+                <ProjectTab
+                  data={data}
+                  activeTab={activeTab}
+                  setActiveTab={setActiveTab}
+                />
+                <ContentWrapper $activePage={activeTab}>
+                  <Content>📊 Result Content</Content>
+                  <Content>📝 Review Content</Content>
+                </ContentWrapper>
+              </ProjectContent>
             </div>
-          </ProjectDetail>
+          </ProjectSection>
         </div>
         <div
           className={`h-screen flex justify-center items-center text-white text-4xl font-bold`}
@@ -488,7 +608,7 @@ const Main = () => {
       >
         <ProjectNavigation
           selectedProjectId={selectedProjectId}
-          setSelectedProjectId={setSelectedProjectId}
+          onClickProjectCubeButton={onClickProjectCubeButton}
         />
       </div>
 
