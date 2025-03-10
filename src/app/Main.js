@@ -589,7 +589,25 @@ const Main = () => {
                   setActiveTab={setActiveTab}
                 />
                 <ContentWrapper $activePage={activeTab}>
-                  <Content>📊 Result Content</Content>
+                  <Content>
+                    <img
+                      src="/images/rm_sidebar_open.png"
+                      alt="rm_sidebar_open"
+                    />
+                    <img
+                      src="/images/rm_pin_highlight.png"
+                      alt="rm_pin_highlight"
+                    />
+                    <img
+                      src="/images/rm_sidebar_close.png"
+                      alt="rm_sidebar_close"
+                    />
+                    <img
+                      src="/images/rm_image_popup.png"
+                      alt="rm_image_popup"
+                    />
+                    <img src="/images/rm_zoom_in.png" alt="rm_zoom_in" />
+                  </Content>
                   <Content>📝 Review Content</Content>
                 </ContentWrapper>
               </ProjectContent>
